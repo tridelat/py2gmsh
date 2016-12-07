@@ -1,0 +1,6 @@
+*.geo
+*.geo_unrolled
+*.msh
+*.pos
+*.swp
+
