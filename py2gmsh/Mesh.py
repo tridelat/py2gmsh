@@ -12,11 +12,17 @@ class Mesh:
         self.volumes = {}
         self.regions = {}
         self.fields = {}
-        self.physicalgroups = {}
+        self.groups = {}
         self.Options = Options()
         self.BackgroundField = None
         self.BoundaryLayerField = None
         self.Coherence = True
+
+    def getLines(self, line_list):
+        lines = []
+        for i in line_list:
+            lines += [self.lines[i]]
+        return lines
 
     def addEntity(self, entity):
         if isinstance(entity, Point):
@@ -37,6 +43,11 @@ class Mesh:
         elif isinstance(entity, Volume):
             assert not self.volumes.get(entity.nb), 'Volume nb '+str(entity.nb)+' already exists!'
             self.volumes[entity.nb] = entity
+
+    def addGroup(self, group):
+        assert isinstance(group, PhysicalGroup), 'Not a PhysicalGroup object'
+        assert not self.groups.get(group.nb), 'PhysicalGroup nb '+str(group.nb)+' already exists!'
+        self.groups[group.nb] = group
 
     def addField(self, field):
         assert isinstance(field, Field), 'Not a Field object'
@@ -61,29 +72,29 @@ class Mesh:
 
         # Physical Groups
         geo.write('\n// Physical Groups\n')
-        for group in self.physicalgroups.items():
+        for i, group in self.groups.items():
             if group.name:
                 name = '"'+group.name+'", '+str(group.nb)
             else:
                 name = group.nb
             if group.points:
                 points = []
-                for key, point in group.points:
+                for key, point in group.points.items():
                     points.append(point.nb)
                 geo.write("Physical Point({0}) = {{{1}}};\n".format(name, str(points)[1:-1]))
             if group.lines:
                 lines = []
-                for key, line in group.lines:
+                for key, line in group.lines.items():
                     lines.append(line.nb)
                 geo.write("Physical Line({0}) = {{{1}}};\n".format(name, str(lines)[1:-1]))
             if group.surfaces:
                 surfaces = []
-                for key, surface in group.surfaces:
+                for key, surface in group.surfaces.items():
                     surfaces.append(surface.nb)
                     geo.write("Physical Surface({0}) = {{{1}}};\n".format(name, str(surfaces)[1:-1]))
             if group.volumes:
                 volumes = []
-                for key, volume in group.volumes:
+                for key, volume in group.volumes.items():
                     volumes.append(volume.nb)
                 geo.write("Physical Volume({0}) = {{{1}}};\n".format(name, str(volumes)[1:-1]))
 
@@ -92,7 +103,9 @@ class Mesh:
             for attr in field.__dict__:
                 val = getattr(field, attr)
                 if val is not None:
-                    if attr == 'EdgesList' or attr =='NodesList' or attr == 'FacesList' or attr == 'RegionsList' or attr == 'FieldsList':
+                    if isinstance(val, str):
+                        val_str = '"'+val+'"'
+                    elif attr == 'EdgesList' or attr =='NodesList' or attr == 'FacesList' or attr == 'RegionsList' or attr == 'FieldsList':
                         val_str = '{'+str([v.nb for v in val])[1:-1]+'}'
                     else:
                         val_str = str(val)

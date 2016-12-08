@@ -1,5 +1,39 @@
 import numpy as np
 
+class PhysicalGroup(object):
+
+    count = 0
+    def __init__(self, nb=None, name=None):
+        type(self).count += 1
+        if nb is None:
+            self.nb = type(self).count
+        else:
+            self.nb = nb
+        self.name = name
+        self.points = {}
+        self.lines = {}
+        self.lineloops = {}
+        self.surfaces = {}
+        self.surfaceloops = {}
+        self.volumes = {}
+        self.regions = {}
+
+    def addEntity(self, entity):
+        if isinstance(entity, Point):
+            assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
+            self.points[entity.nb] = entity
+        elif isinstance(entity, Line):
+            assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
+            self.lines[entity.nb] = entity
+        elif isinstance(entity, PlaneSurface):
+            assert not self.surfaces.get(entity.nb), 'Surface nb '+str(entity.nb)+' already exists!'
+            self.surfaces[entity.nb] = entity
+        elif isinstance(entity, Volume):
+            assert not self.volumes.get(entity.nb), 'Volume nb '+str(entity.nb)+' already exists!'
+            self.volumes[entity.nb] = entity
+        # entity.group = self
+
+
 class Entity(object):
     __slots__ = ['nb', 'name' 'PhysicalGroup']
     def __init__(self, nb=None, group=None, name=None):
