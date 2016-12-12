@@ -3,7 +3,7 @@ import numpy as np
 class PhysicalGroup(object):
 
     count = 0
-    def __init__(self, nb=None, name=None):
+    def __init__(self, nb=None, name=None, mesh=None):
         type(self).count += 1
         if nb is None:
             self.nb = type(self).count
@@ -17,6 +17,8 @@ class PhysicalGroup(object):
         self.surfaceloops = {}
         self.volumes = {}
         self.regions = {}
+        if mesh is not None:
+            mesh.addGroup(self)
 
     def addEntity(self, entity):
         if isinstance(entity, Point):
@@ -36,21 +38,25 @@ class PhysicalGroup(object):
 
 class Entity(object):
     __slots__ = ['nb', 'name' 'PhysicalGroup']
-    def __init__(self, nb=None, group=None, name=None):
+    def __init__(self, nb=None, group=None, name=None, mesh=None):
         self.nb = nb
         self.name = name
         self.PhysicalGroup = group
+        if mesh is not None:
+            mesh.addEntity(self)
+        if group is not None:
+            group.addEntity(self)
 
 
 # POINTS
 
 class Point(Entity):
     count = 0
-    def __init__(self, xyz, nb=None, group=None):
+    def __init__(self, xyz, nb=None, group=None, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Point, self).__init__(nb=nb, group=group, name='Point')
+        super(Point, self).__init__(nb=nb, group=group, name='Point', mesh=mesh)
         self.xyz = xyz
 
     def setCoords(self, xyz):
@@ -64,11 +70,11 @@ class Point(Entity):
 
 class Line(Entity):
     count = 0
-    def __init__(self, points, nb=None, group=None, index=False):
+    def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Line, self).__init__(nb=nb, group=group, name='Line')
+        super(Line, self).__init__(nb=nb, group=group, name='Line', mesh=mesh)
         self.points = points
         self._index = index
 
@@ -81,11 +87,11 @@ class Line(Entity):
 
 class Circle(Entity):
     count = 0
-    def __init__(self, start, center, end, nb=None, group=None, index=False):
+    def __init__(self, start, center, end, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Circle, self).__init__(nb=nb, group=group, name='Circle')
+        super(Circle, self).__init__(nb=nb, group=group, name='Circle', mesh=mesh)
         self.start = start
         self.center = center
         self.end = end
@@ -97,11 +103,11 @@ class Circle(Entity):
 
 class CatmullRom(Entity):
     count = 0
-    def __init__(self, points, nb=None, group=None, index=False):
+    def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Spline, self).__init__(nb=nb, group=group, name='CatmullRom')
+        super(Spline, self).__init__(nb=nb, group=group, name='CatmullRom', mesh=mesh)
         self.points = points
         self._index = index
 
@@ -111,11 +117,11 @@ class CatmullRom(Entity):
 
 class Ellipse(Entity):
     count = 0
-    def __init__(self, start, center, axis_point, end, nb=None, group=None, index=False):
+    def __init__(self, start, center, axis_point, end, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Circle, self).__init__(nb=nb, group=group, name='Ellipse')
+        super(Circle, self).__init__(nb=nb, group=group, name='Ellipse', mesh=mesh)
         self.start = start
         self.center = center
         self.end = end
@@ -128,11 +134,11 @@ class Ellipse(Entity):
 
 class BSpline(Entity):
     count = 0
-    def __init__(self, points, nb=None, group=None, index=False):
+    def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(BSpline, self).__init__(nb=nb, group=group, name='BSpline')
+        super(BSpline, self).__init__(nb=nb, group=group, name='BSpline', mesh=mesh)
         self.points = points
         self._index = index
 
@@ -142,11 +148,11 @@ class BSpline(Entity):
 
 class Spline(Entity):
     count = 0
-    def __init__(self, points, nb=None, group=None, index=False):
+    def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Spline, self).__init__(nb=nb, group=group, name='Spline')
+        super(Spline, self).__init__(nb=nb, group=group, name='Spline', mesh=mesh)
         self.points = points
         self._index = index
 
@@ -156,11 +162,11 @@ class Spline(Entity):
 
 class CompoundLine(Entity):
     count = 0
-    def __init__(self, lines, nb=None, group=None, index=False):
+    def __init__(self, lines, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Spline, self).__init__(nb=nb, group=group, name='Compound Line')
+        super(Spline, self).__init__(nb=nb, group=group, name='Compound Line', mesh=mesh)
         self.lines = lines
         self._index = index
 
@@ -170,11 +176,11 @@ class CompoundLine(Entity):
 
 class LineLoop(Entity):
     count = 0
-    def __init__(self, lines, nb=None, group=None, index=False):
+    def __init__(self, lines, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(LineLoop, self).__init__(nb=nb, group=group, name='Line Loop')
+        super(LineLoop, self).__init__(nb=nb, group=group, name='Line Loop', mesh=mesh)
         self.lines = lines
         self._index = index
 
@@ -201,11 +207,11 @@ class LineLoop(Entity):
 
 class PlaneSurface(Entity):
     count = 0
-    def __init__(self, lineloops, nb=None, group=None, index=False):
+    def __init__(self, lineloops, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(PlaneSurface, self).__init__(nb=nb, group=group, name='Plane Surface')
+        super(PlaneSurface, self).__init__(nb=nb, group=group, name='Plane Surface', mesh=mesh)
         self.lineloops = lineloops
         self._index = index
 
@@ -218,11 +224,11 @@ class PlaneSurface(Entity):
 
 class RuledSurface:
     count = 0
-    def __init__(self, lineloops, nb=None, group=None, sphere=None):
+    def __init__(self, lineloops, nb=None, group=None, sphere=None, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(RuledSurface, self).__init__(nb=nb, group=group, name='Ruled Surface')
+        super(RuledSurface, self).__init__(nb=nb, group=group, name='Ruled Surface', mesh=mesh)
         self.lineloops = lineloops
         self.Sphere = sphere
 
@@ -235,11 +241,11 @@ class RuledSurface:
 
 class CompoundSurface(Entity):
     count = 0
-    def __init__(self, surfaces, nb=None, group=None, index=False):
+    def __init__(self, surfaces, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Spline, self).__init__(nb=nb, group=group, name='Compound Surface')
+        super(Spline, self).__init__(nb=nb, group=group, name='Compound Surface', mesh=mesh)
         self.surfaces = surfaces
         self._index = index
 
@@ -249,11 +255,11 @@ class CompoundSurface(Entity):
 
 class SurfaceLoop(Entity):
     count = 0
-    def __init__(self, surfaces, nb=None, group=None, index=False):
+    def __init__(self, surfaces, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(SurfaceLoop, self).__init__(nb=nb, group=group, name='Surface Loop')
+        super(SurfaceLoop, self).__init__(nb=nb, group=group, name='Surface Loop', mesh=mesh)
         self.surfaces = surfaces
         self._index = index
 
@@ -268,11 +274,11 @@ class SurfaceLoop(Entity):
 
 class Volume(Entity):
     count = 0
-    def __init__(self, surfaceloops, nb=None, group=None, index=False):
+    def __init__(self, surfaceloops, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Volume, self).__init__(nb=nb, group=group, name='Volume')
+        super(Volume, self).__init__(nb=nb, group=group, name='Volume', mesh=mesh)
         self.surfaceloops = None
         self._index = index
 
@@ -285,11 +291,11 @@ class Volume(Entity):
 
 class CompoundVolume(Entity):
     count = 0
-    def __init__(self, volumes, nb=None, group=None, index=False):
+    def __init__(self, volumes, nb=None, group=None, index=False, mesh=None):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        super(Volume, self).__init__(nb=nb, group=group, name='Compound Volume')
+        super(Volume, self).__init__(nb=nb, group=group, name='Compound Volume', mesh=mesh)
         self.volumes = None
         self._index = index
 

@@ -4,20 +4,23 @@ class Field(object):
     __slots__ = ['nb', 'add_bg', 'name']
     nb_total = 0
     field_instances = []
-    def __init__(self, nb=None, add_bg=True, name=None):
+    def __init__(self, nb=None, add_bg=True, name=None, mesh=None):
         Field.nb_total += 1
         if nb is None:
             self.nb = Field.nb_total
         else:
             self.nb = nb
+        if mesh is not None:
+            mesh.addField(self)
         self.add_bg = add_bg
         self.name = name
         Field.field_instances.append(self)
 
 class BoundaryLayer(Field):
-    def __init__(self, nb=None, add_bg=True):
+    def __init__(self, nb=None, add_bg=True, mesh=None):
         super(BoundaryLayer, self).__init__(nb=nb, add_bg=add_bg,
-                                            name='BoundaryLayer')
+                                            name='BoundaryLayer',
+                                            mesh=mesh)
         self.hwall_t = None
         self.hwall_n = None
         self.ratio = None
@@ -32,8 +35,8 @@ class BoundaryLayer(Field):
         self.thickness = None
 
 class Box(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(Box, self).__init__(nb=nb, add_bg=add_bg, name='Box')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(Box, self).__init__(nb=nb, add_bg=add_bg, name='Box', mesh=mesh)
         self.VIn = None
         self.VOut = None
         self.XMax = None
@@ -44,13 +47,15 @@ class Box(Field):
         self.ZMin = None
 
 class MathEval(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(MathEval, self).__init__(nb=nb, add_bg=add_bg, name='MathEval')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(MathEval, self).__init__(nb=nb, add_bg=add_bg, name='MathEval',
+                                       mesh=mesh)
         self.F = None
 
 class Restrict(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(Restrict, self).__init__(nb=nb, add_bg=add_bg, name='Restrict')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(Restrict, self).__init__(nb=nb, add_bg=add_bg, name='Restrict',
+                                       mesh=mesh)
         self.IField = None
         self.EdgesList = None
         self.FacesList = None
@@ -58,8 +63,9 @@ class Restrict(Field):
         self.VerticesList = None
 
 class Attractor(Field):
-    def __init__(self, nb=None, add_bg=False):
-        super(Attractor, self).__init__(nb=nb, add_bg=add_bg, name='Attractor')
+    def __init__(self, nb=None, add_bg=False, mesh=None):
+        super(Attractor, self).__init__(nb=nb, add_bg=add_bg, name='Attractor',
+                                        mesh=mesh)
         self.EdgesList = None
         self.FacesList = None
         self.FieldX = None
@@ -69,8 +75,9 @@ class Attractor(Field):
         self.NodesList = None
 
 class Threshold(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(Threshold, self).__init__(nb=nb, add_bg=add_bg, name='Threshold')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(Threshold, self).__init__(nb=nb, add_bg=add_bg, name='Threshold',
+                                        mesh=mesh)
         self.DistMax = None
         self.DistMin = None
         self.IField = None
@@ -80,8 +87,8 @@ class Threshold(Field):
         self.StopAtDistMax = None
 
 class Ball(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(Ball, self).__init__(nb=nb, add_bg=add_bg, name='Ball')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(Ball, self).__init__(nb=nb, add_bg=add_bg, name='Ball', mesh=mesh)
         self.Radius = None
         self.VIn = None
         self.VOut = None
@@ -90,8 +97,8 @@ class Ball(Field):
         self.ZCenter = None
 
 class Cylinder(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(Cylinder, self).__init__(nb=nb, add_bg=add_bg, name='Cylinder')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(Cylinder, self).__init__(nb=nb, add_bg=add_bg, name='Cylinder', mesh=mesh)
         self.Radius = None
         self.VIn = None
         self.VOut = None
@@ -103,7 +110,7 @@ class Cylinder(Field):
         self.ZAxis = None
 
 class Min(Field):
-    def __init__(self, nb=None, add_bg=True):
-        super(Min, self).__init__(nb=nb, add_bg=add_bg, name='Min')
+    def __init__(self, nb=None, add_bg=True, mesh=None):
+        super(Min, self).__init__(nb=nb, add_bg=add_bg, name='Min', mesh=mesh)
         self.FieldsList = None
 
