@@ -174,12 +174,12 @@ class Mesh:
                 val = getattr(class_instance, key)
                 if key != 'Color':
                     if val:
-                        geo.write('{0}.'+key+'= {1};\n'.format(class_name, val))
+                        geo.write(class_name+'.'+key+'= {0};\n'.format(val))
                 else:
                     for key2 in class_instance.Color.__dict__:
                         val2 = getattr(class_instance.Color, key2)
                         if val2:
-                            geo.write('{0}.Color.'+key+'= {1};\n'.format(class_name, val2))
+                            geo.write(class_name+'.Color.'+key2+'= {0};\n'.format(val2))
 
         for key in self.Options.__dict__:
             options = getattr(self.Options, key)
