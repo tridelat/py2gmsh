@@ -1,6 +1,7 @@
 import numpy as np
 from py2gmsh.Entity import *
 from py2gmsh.Fields import *
+from py2gmsh import Options as opt
 
 class Mesh:
     def __init__(self):
@@ -13,7 +14,7 @@ class Mesh:
         self.regions = {}
         self.fields = {}
         self.groups = {}
-        self.Options = Options()
+        self.Options = OptionsHolder()
         self.BackgroundField = None
         self.BoundaryLayerField = None
         self.Coherence = True
@@ -168,10 +169,22 @@ class Mesh:
         if self.BoundaryLayerField:
             geo.write("BoundaryLayer Field = {0};\n".format(self.BoundaryLayerField.nb))
 
+        def write_option(class_instance):
+            class_name = class_instance.__class__.__name__
+            for key in class_instance.__dict__:
+                val = getattr(class_instance, key)
+                if key != 'Color':
+                    if val:
+                        geo.write('{0}.'+key+'= {1};\n'.format(class_name, val))
+                else:
+                    for key2 in class_instance.Color.__dict__:
+                        val2 = getattr(class_instance.Color, key2)
+                        if val2:
+                            geo.write('{0}.Color.'+key+'= {1};\n'.format(class_name, val2))
+
         for key in self.Options.__dict__:
-            val = getattr(self.Options, key)
-            if val:
-                geo.write('Mesh.'+key+'= {0};\n'.format(self.Options[key]))
+            options = getattr(self.Options, key)
+            write_option(options)
 
         if self.Coherence:
             geo.write("Coherence;\n") # remove duplicates
@@ -179,181 +192,12 @@ class Mesh:
         geo.close()
 
 
-class Options:
+class OptionsHolder:
     def __init__(self):
-        self.Algorithm = None
-        self.Algorithm3D = None
-        self.AllowSwapAngle = None
-        self.AngleSmoothNormals = None
-        self.AnisoMax = None
-        self.BdfFieldFormat = None
-        self.Binary = None
-        self.CgnsImportOrder = None
-        self.ChacoArchitecture = None
-        self.ChacoEigensolver = None
-        self.ChacoEigTol = None
-        self.ChacoGlobalMethod = None
-        self.ChacoHypercubeDim = None
-        self.ChacoLocalMethod = None
-        self.ChacoMeshDim1 = None
-        self.ChacoMeshDim2 = None
-        self.ChacoMeshDim3 = None
-        self.ChacoParamINTERNAL_VERTICES = None
-        self.ChacoParamREFINE_MAP = None
-        self.ChacoParamREFINE_PARTITION = None
-        self.ChacoParamTERMINAL_PROPOGATION = None
-        self.ChacoPartitionSection = None
-        self.ChacoSeed = None
-        self.ChacoVMax = None
-        self.CharacteristicLengthExtendFromBoundary = None
-        self.CharacteristicLengthFactor = None
-        self.CharacteristicLengthFromCurvature = None
-        self.CharacteristicLengthFromPoints = None
-        self.CharacteristicLengthMax = None
-        self.CharacteristicLengthMin = None
-        self.Clip = None
-        # self.Color.Eight = None
-        # self.Color.Eighteen = None
-        # self.Color.Eleven = None
-        # self.Color.Fifteen = None
-        # self.Color.Five = None
-        # self.Color.Four = None
-        # self.Color.Fourteen = None
-        # self.Color.Hexahedra = None
-        # self.Color.Lines = None
-        # self.Color.Nine = None
-        # self.Color.Nineteen = None
-        # self.Color.Normals = None
-        # self.Color.One = None
-        # self.Color.Points = None
-        # self.Color.PointsSup = None
-        # self.Color.Prisms = None
-        # self.Color.Pyramids = None
-        # self.Color.Quadrangles = None
-        # self.Color.Seven = None
-        # self.Color.Seventeen = None
-        # self.Color.Six = None
-        # self.Color.Sixteen = None
-        # self.Color.Tangents = None
-        # self.Color.Ten = None
-        # self.Color.Tetrahedra = None
-        # self.Color.Thirteen = None
-        # self.Color.Three = None
-        # self.Color.Triangles = None
-        # self.Color.Trihedra = None
-        # self.Color.Twelve = None
-        # self.Color.Two = None
-        # self.Color.Zero = None
-        self.ColorCarousel = None
-        self.CpuTime = None
-        self.DoRecombinationTest = None
-        self.DrawSkinOnly = None
-        self.Dual = None
-        self.ElementOrder = None
-        self.Explode = None
-        self.FlexibleTransfinite = None
-        self.Format = None
-        self.Hexahedra = None
-        self.HighOrderNumLayers = None
-        self.HighOrderOptimize = None
-        self.HighOrderOptPrimSurfMesh = None
-        self.HighOrderPoissonRatio = None
-        self.HighOrderThresholdMax = None
-        self.HighOrderThresholdMin = None
-        self.IgnorePartitionBoundary = None
-        self.LabelSampling = None
-        self.LabelType = None
-        self.LcIntegrationPrecision = None
-        self.Light = None
-        self.LightLines = None
-        self.LightTwoSide = None
-        self.LineNumbers = None
-        self.Lines = None
-        self.LineWidth = None
-        self.Lloyd = None
-        self.MeshOnlyVisible = None
-        self.MetisAlgorithm = None
-        self.MetisEdgeMatching = None
-        self.MetisRefinementAlgorithm = None
-        self.MinimumCirclePoints = None
-        self.MinimumCurvePoints = None
-        self.MshFilePartitioned = None
-        self.MshFileVersion = None
-        self.NbHexahedra = None
-        self.NbNodes = None
-        self.NbPartitions = None
-        self.NbPrisms = None
-        self.NbPyramids = None
-        self.NbQuadrangles = None
-        self.NbTetrahedra = None
-        self.NbTriangles = None
-        self.NbTrihedra = None
-        self.NewtonConvergenceTestXYZ = None
-        self.Normals = None
-        self.NumSubEdges = None
-        self.OldRefinement = None
-        self.Optimize = None
-        self.OptimizeNetgen = None
-        self.Partitioner = None
-        self.PartitionHexWeight = None
-        self.PartitionPrismWeight = None
-        self.PartitionPyramidWeight = None
-        self.PartitionQuadWeight = None
-        self.PartitionTetWeight = None
-        self.PartitionTrihedronWeight = None
-        self.PartitionTriWeight = None
-        self.PointNumbers = None
-        self.Points = None
-        self.PointSize = None
-        self.PointType = None
-        self.PreserveNumberingMsh2 = None
-        self.Prisms = None
-        self.Pyramids = None
-        self.Quadrangles = None
-        self.QualityInf = None
-        self.QualitySup = None
-        self.QualityType = None
-        self.RadiusInf = None
-        self.RadiusSup = None
-        self.RandomFactor = None
-        self.RecombinationAlgorithm = None
-        self.RecombinationTestHorizStart = None
-        self.RecombinationTestNoGreedyStrat = None
-        self.Recombine3DAll = None
-        self.Recombine3DConformity = None
-        self.Recombine3DLevel = None
-        self.RecombineAll = None
-        self.RefineSteps = None
-        self.RemeshAlgorithm = None
-        self.RemeshParametrization = None
-        self.SaveAll = None
-        self.SaveElementTagType = None
-        self.SaveGroupsOfNodes = None
-        self.SaveParametric = None
-        self.ScalingFactor = None
-        self.SecondOrderExperimental = None
-        self.SecondOrderIncomplete = None
-        self.SecondOrderLinear = None
-        self.SmoothCrossField = None
-        self.Smoothing = None
-        self.SmoothNormals = None
-        self.SmoothRatio = None
-        self.SubdivisionAlgorithm = None
-        self.SurfaceEdges = None
-        self.SurfaceFaces = None
-        self.SurfaceNumbers = None
-        self.SwitchElementTags = None
-        self.Tangents = None
-        self.Tetrahedra = None
-        self.ToleranceEdgeLength = None
-        self.ToleranceInitialDelaunay = None
-        self.Triangles = None
-        self.Trihedra = None
-        self.VolumeEdges = None
-        self.VolumeFaces = None
-        self.VolumeNumbers = None
-        self.Voronoi = None
-        self.ZoneDefinition = None
+        self.Mesh = opt.Mesh()
+        self.General = opt.General()
+        self.Geometry = opt.Geometry()
+
 
 def geometry_to_gmsh(domain):
     self = domain
