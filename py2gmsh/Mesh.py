@@ -18,11 +18,61 @@ class Mesh:
         self.BoundaryLayerField = None
         self.Coherence = True
 
-    def getLines(self, line_list):
+    def getPointsFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
+        points = []
+        for i in index:
+            points += [self.points[i]]
+        return points
+
+    def getLinesFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
         lines = []
-        for i in line_list:
+        for i in index:
             lines += [self.lines[i]]
         return lines
+
+    def getSurfacesFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
+        surfaces = []
+        for i in index:
+            surfaces += [self.surfaces[i]]
+        return surfaces
+
+    def getSurfaceLoopsFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
+        surfaceloops = []
+        for i in index:
+            surfaceloops += [self.surfaceloops[i]]
+        return surfaceloops
+
+    def getVolumesFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
+        volumes = []
+        for i in index:
+            volumes += [self.volumes[i]]
+        return volumes
+
+    def getFieldsFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
+        fields = []
+        for i in index:
+            fields += [self.fields[i]]
+        return fields
+
+    def getGroupsFromIndex(self, index):
+        if isinstance(index, int):
+            index = [index]
+        groups = []
+        for i in index:
+            groups += [self.groups[i]]
+        return groups
 
     def addEntity(self, entity):
         if isinstance(entity, Point):
