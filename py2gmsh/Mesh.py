@@ -1,6 +1,5 @@
-import numpy as np
-from py2gmsh.Entity import *
-from py2gmsh.Fields import *
+from py2gmsh import Entity as ent
+from py2gmsh import Fields as fld
 from py2gmsh import Options as opt
 
 class Mesh:
@@ -76,32 +75,32 @@ class Mesh:
         return groups
 
     def addEntity(self, entity):
-        if isinstance(entity, Point):
+        if isinstance(entity, ent.Point):
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
-        elif isinstance(entity, Line):
+        elif isinstance(entity, ent.Line):
             assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
             self.lines[entity.nb] = entity
-        elif isinstance(entity, LineLoop):
+        elif isinstance(entity, ent.LineLoop):
             assert not self.lineloops.get(entity.nb), 'LineLoop nb '+str(entity.nb)+' already exists!'
             self.lineloops[entity.nb] = entity
-        elif isinstance(entity, PlaneSurface):
+        elif isinstance(entity, ent.PlaneSurface):
             assert not self.surfaces.get(entity.nb), 'Surface nb '+str(entity.nb)+' already exists!'
             self.surfaces[entity.nb] = entity
-        elif isinstance(entity, SurfaceLoop):
+        elif isinstance(entity, ent.SurfaceLoop):
             assert not self.surfaceloops.get(entity.nb), 'SurfaceLoop nb '+str(entity.nb)+' already exists!'
             self.surfaceloops[entity.nb] = entity
-        elif isinstance(entity, Volume):
+        elif isinstance(entity, ent.Volume):
             assert not self.volumes.get(entity.nb), 'Volume nb '+str(entity.nb)+' already exists!'
             self.volumes[entity.nb] = entity
 
     def addGroup(self, group):
-        assert isinstance(group, PhysicalGroup), 'Not a PhysicalGroup object'
+        assert isinstance(group, ent.PhysicalGroup), 'Not a PhysicalGroup object'
         assert not self.groups.get(group.nb), 'PhysicalGroup nb '+str(group.nb)+' already exists!'
         self.groups[group.nb] = group
 
     def addField(self, field):
-        assert isinstance(field, Field), 'Not a Field object'
+        assert isinstance(field, fld.Field), 'Not a Field object'
         assert not self.fields.get(field.nb), 'Field nb '+str(field.nb)+' already exists!'
         self.fields[field.nb] = field
 
@@ -264,3 +263,4 @@ def geometry_to_gmsh(domain):
                 g.addEntity(vol)
 
     return mesh
+ 
