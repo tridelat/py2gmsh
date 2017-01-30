@@ -7,7 +7,7 @@ setup(
   author = 'Tristan de Lataillade',
   author_email = 'delataillade.tristan@gmail.com',
   url = 'https://github.com/tridelat/py2gmsh',
-  download_url = 'https://github.com/tridelat/py2gmsh/tarball/0.0.1',
-  keywords = ['gmsh', 'wrapper'],
+  download_url = 'https://github.com/tridelat/py2gmsh/tarball/0.1',
+  keywords = ['gmsh', 'wrapper', 'mesh'],
   classifiers = [],
 )
