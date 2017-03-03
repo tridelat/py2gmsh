@@ -78,7 +78,7 @@ class Mesh:
         if isinstance(entity, ent.Point):
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
-        elif isinstance(entity, ent.Line):
+        elif isinstance(entity, ent.Line) or isinstance(entity, ent.Circle):
             assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
             self.lines[entity.nb] = entity
         elif isinstance(entity, ent.LineLoop):

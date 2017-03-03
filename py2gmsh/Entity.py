@@ -98,7 +98,7 @@ class Circle(Entity):
         self._index = index
 
     def _val2str(self):
-        return '{'+str([self.start, self.center, self.end])[1:-1]+'}'
+        return '{'+str([self.start.nb, self.center.nb, self.end.nb])[1:-1]+'}'
 
 
 class CatmullRom(Entity):
