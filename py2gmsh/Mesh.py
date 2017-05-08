@@ -13,7 +13,7 @@ class Mesh:
         self.regions = {}
         self.fields = {}
         self.groups = {}
-        self.Options = OptionsHolder()
+        self.Options = opt.OptionsHolder()
         self.BackgroundField = None
         self.BoundaryLayerField = None
         self.Coherence = True
@@ -119,6 +119,10 @@ class Mesh:
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
         for key, entity in self.surfaces.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
+        for key, entity in self.surfaceloops.items():
+            geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
+        for key, entity in self.volumes.items():
+            geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
 
         # Physical Groups
         geo.write('\n// Physical Groups\n')
@@ -189,13 +193,6 @@ class Mesh:
             geo.write("Coherence;\n") # remove duplicates
 
         geo.close()
-
-
-class OptionsHolder:
-    def __init__(self):
-        self.Mesh = opt.Mesh()
-        self.General = opt.General()
-        self.Geometry = opt.Geometry()
 
 
 def geometry_to_gmsh(domain):

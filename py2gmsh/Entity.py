@@ -47,6 +47,16 @@ class Entity(object):
         if group is not None:
             group.addEntity(self)
 
+    def check_instance(self, entities, entity_class, index, mesh):
+        if index is False:
+            for entity in entities:
+                assert isinstance(entity, entity_class), 'points must be class instances of '+str(entity_class)
+        #elif index is True:
+        #    assert isinstance(mesh, Mesh), 'Mesh instance must be passed when defining entities per index'
+        #    for entity in entities:
+        #        assert isinstance(entity, int), 'index must be integers'
+
+
 
 # POINTS
 
@@ -68,6 +78,8 @@ class Point(Entity):
 
 # LINES
 
+
+
 class Line(Entity):
     count = 0
     def __init__(self, points, nb=None, group=None, index=False, mesh=None):
@@ -75,6 +87,7 @@ class Line(Entity):
         if nb is None:
             nb = type(self).count
         super(Line, self).__init__(nb=nb, group=group, name='Line', mesh=mesh)
+        self.check_instance(points, Point, index, mesh)
         self.points = points
         self._index = index
 
@@ -139,6 +152,7 @@ class BSpline(Entity):
         if nb is None:
             nb = type(self).count
         super(BSpline, self).__init__(nb=nb, group=group, name='BSpline', mesh=mesh)
+        self.check_instance(points, Point, index, mesh)
         self.points = points
         self._index = index
 
@@ -153,6 +167,7 @@ class Spline(Entity):
         if nb is None:
             nb = type(self).count
         super(Spline, self).__init__(nb=nb, group=group, name='Spline', mesh=mesh)
+        self.check_instance(points, Point, index, mesh)
         self.points = points
         self._index = index
 
@@ -167,6 +182,7 @@ class CompoundLine(Entity):
         if nb is None:
             nb = type(self).count
         super(Spline, self).__init__(nb=nb, group=group, name='Compound Line', mesh=mesh)
+        self.check_instance(lines, Line, index, mesh)
         self.lines = lines
         self._index = index
 
@@ -181,6 +197,7 @@ class LineLoop(Entity):
         if nb is None:
             nb = type(self).count
         super(LineLoop, self).__init__(nb=nb, group=group, name='Line Loop', mesh=mesh)
+        self.check_instance(lines, Line, index, mesh)
         self.lines = lines
         self._index = index
 
@@ -212,6 +229,7 @@ class PlaneSurface(Entity):
         if nb is None:
             nb = type(self).count
         super(PlaneSurface, self).__init__(nb=nb, group=group, name='Plane Surface', mesh=mesh)
+        self.check_instance(lineloops, LineLoop, index, mesh)
         self.lineloops = lineloops
         self._index = index
 
@@ -229,6 +247,7 @@ class RuledSurface:
         if nb is None:
             nb = type(self).count
         super(RuledSurface, self).__init__(nb=nb, group=group, name='Ruled Surface', mesh=mesh)
+        self.check_instance(lineloops, LineLoop, index, mesh)
         self.lineloops = lineloops
         self.Sphere = sphere
 
@@ -279,6 +298,7 @@ class Volume(Entity):
         if nb is None:
             nb = type(self).count
         super(Volume, self).__init__(nb=nb, group=group, name='Volume', mesh=mesh)
+        self.check_instance(surfaceloops, SurfaceLoop, index, mesh)
         self.surfaceloops = None
         self._index = index
 
@@ -296,6 +316,7 @@ class CompoundVolume(Entity):
         if nb is None:
             nb = type(self).count
         super(Volume, self).__init__(nb=nb, group=group, name='Compound Volume', mesh=mesh)
+        self.check_instance(volumes, Volume, index, mesh)
         self.volumes = None
         self._index = index
 

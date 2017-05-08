@@ -1,4 +1,11 @@
 
+class OptionsHolder:
+    def __init__(self):
+        self.Mesh = opt.Mesh()
+        self.General = opt.General()
+        self.Geometry = opt.Geometry()
+
+
 class General:
     def __init__(self):
         self.AlphaBlending = None
