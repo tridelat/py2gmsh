@@ -1,9 +1,9 @@
 
 class OptionsHolder:
     def __init__(self):
-        self.Mesh = opt.Mesh()
-        self.General = opt.General()
-        self.Geometry = opt.Geometry()
+        self.Mesh = Mesh()
+        self.General = General()
+        self.Geometry = Geometry()
 
 
 class General:

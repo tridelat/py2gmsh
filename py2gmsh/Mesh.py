@@ -78,19 +78,19 @@ class Mesh:
         if isinstance(entity, ent.Point):
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
-        elif isinstance(entity, ent.Line):
+        elif isinstance(entity, ent.LineEntity):
             assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
             self.lines[entity.nb] = entity
         elif isinstance(entity, ent.LineLoop):
             assert not self.lineloops.get(entity.nb), 'LineLoop nb '+str(entity.nb)+' already exists!'
             self.lineloops[entity.nb] = entity
-        elif isinstance(entity, ent.PlaneSurface):
+        elif isinstance(entity, ent.SurfaceEntity):
             assert not self.surfaces.get(entity.nb), 'Surface nb '+str(entity.nb)+' already exists!'
             self.surfaces[entity.nb] = entity
         elif isinstance(entity, ent.SurfaceLoop):
             assert not self.surfaceloops.get(entity.nb), 'SurfaceLoop nb '+str(entity.nb)+' already exists!'
             self.surfaceloops[entity.nb] = entity
-        elif isinstance(entity, ent.Volume):
+        elif isinstance(entity, ent.VolumeEntity):
             assert not self.volumes.get(entity.nb), 'Volume nb '+str(entity.nb)+' already exists!'
             self.volumes[entity.nb] = entity
 
