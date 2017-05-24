@@ -145,7 +145,7 @@ class Mesh:
                 surfaces = []
                 for key, surface in group.surfaces.items():
                     surfaces.append(surface.nb)
-                    geo.write("Physical Surface({0}) = {{{1}}};\n".format(name, str(surfaces)[1:-1]))
+                geo.write("Physical Surface({0}) = {{{1}}};\n".format(name, str(surfaces)[1:-1]))
             if group.volumes:
                 volumes = []
                 for key, volume in group.volumes.items():

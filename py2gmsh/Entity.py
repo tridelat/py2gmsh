@@ -1,7 +1,19 @@
 import numpy as np
 
 class PhysicalGroup(object):
+    """PhysicalGroup
 
+    Parameters
+    ----------
+    nb: Optional[int]
+        Physical group number. If not set, it will use the count 
+        number (incrementing automatically upon creation of new
+        physical groups).
+    name: Optional[str]
+        Name of physical group.
+    mesh: Optional[py2gmsh.Mesh.Mesh]
+        Mesh class instance to which the group belongs.
+    """
     count = 0
     def __init__(self, nb=None, name=None, mesh=None):
         type(self).count += 1
@@ -21,6 +33,13 @@ class PhysicalGroup(object):
             mesh.addGroup(self)
 
     def addEntity(self, entity):
+        """Adds entity to PhysicalGroup instance
+
+        Parameters
+        ----------
+        entity: py2gmsh.Entity.Entity
+            Entity to add to group (e.g. Point, Line, LineLoop).
+        """
         if isinstance(entity, Point):
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
@@ -36,8 +55,22 @@ class PhysicalGroup(object):
 
 
 class Entity(object):
+    """Base class for all entities.
+    (!) Should not be created manually
+
+    Parameters
+    ----------
+    nb: int
+        Entity number.
+    group: Optional[PhysicalGroup]
+        Physical group of Entity.
+    name: Optional[str]
+        Name of Entity.
+    mesh: Optional[py2gmsh.Mesh.Mesh]
+        Mesh of entity.
+    """
     __slots__ = ['nb', 'name' 'PhysicalGroup']
-    def __init__(self, nb=None, group=None, name=None, mesh=None):
+    def __init__(self, nb, group=None, name=None, mesh=None):
         self.nb = nb
         self.name = name
         self.PhysicalGroup = group
@@ -60,6 +93,21 @@ class Entity(object):
 # POINTS
 
 class Point(Entity):
+    """Creates a Point.
+
+    Parameters
+    ----------
+    xyz: array_like
+        Coordinates of point (array of length 3)
+    nb: Optional[int]
+        Point number. If not set, it will use the class count 
+        number (incrementing automatically upon creation of new
+        points).
+    group: Optional[PhysicalGroup]
+        Physical group of Entity.
+    mesh: Optional[py2gmsh.Mesh.Mesh]
+        Mesh of entity.
+    """
     count = 0
     def __init__(self, xyz, nb=None, group=None, mesh=None):
         type(self).count += 1
@@ -78,8 +126,20 @@ class Point(Entity):
 # LINES
 
 class LineEntity(Entity):
-    """
-    Parent class of all line type entities
+    """Parent class for all line type entities.
+
+    Parameters
+    ----------
+    nb: Optional[int]
+        Point number. If not set, it will use the class count 
+        number (incrementing automatically upon creation of new
+        lines).
+    group: Optional[PhysicalGroup]
+        Physical group of Entity.
+    name: Optional[str]
+        Name of line.
+    mesh: Optional[py2gmsh.Mesh.Mesh]
+        Mesh of line.
     """
     count = 0
     def __init__(self, nb=None, group=None, name=None, mesh=None):
@@ -89,7 +149,23 @@ class LineEntity(Entity):
         super(LineEntity, self).__init__(nb=nb, group=group, name=name, mesh=mesh)
 
 class Line(LineEntity):
+    """Creates a Line.
+
+    Parameters
+    ----------
+    points: array_like[Points]
+        Points instances (array of length 2)
+    nb: Optional[int]
+        LineEntity number. If not set, it will use the class count 
+        number (incrementing automatically upon creation of new
+        points).
+    group: Optional[PhysicalGroup]
+        Physical group of entity.
+    mesh: Optional[py2gmsh.Mesh.Mesh]
+        Mesh of entity.
+    """
     def __init__(self, points, nb=None, group=None, index=False, mesh=None):
+        assert len(points) == 2, 'points array must be of length 2 when creating a line'
         self.check_instance(points, Point, index, mesh)
         super(Line, self).__init__(nb=nb, group=group, name='Line', mesh=mesh)
         self.points = points
@@ -103,6 +179,27 @@ class Line(LineEntity):
 
 
 class Circle(LineEntity):
+    """Creates a Circle.
+
+    Parameters
+    ----------
+    start: Point
+        start point of circle arc.
+    center: Point
+        center point of circle arc.
+    end: Point
+        end point of circle arc.
+    nb: Optional[int]
+        LineEntity number. If not set, it will use the class count 
+        number (incrementing automatically upon creation of new
+        points).
+    group: Optional[PhysicalGroup]
+        Physical group of entity.
+    index: Optional[bool]
+        Look for points defining the circle per index if True.
+    mesh: Optional[py2gmsh.Mesh.Mesh]
+        Mesh of entity.
+    """
     def __init__(self, start, center, end, nb=None, group=None, index=False, mesh=None):
         self.check_instance([start, center, end], Point, index, mesh)
         super(Circle, self).__init__(nb=nb, group=group, name='Circle', mesh=mesh)
