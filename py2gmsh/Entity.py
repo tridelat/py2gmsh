@@ -365,7 +365,7 @@ class SurfaceLoop(Entity):
         type(self).count += 1
         if nb is None:
             nb = type(self).count
-        self.check_instance(surfaces, SurfaceEntity, index, mesh)
+        self.check_instance(surfaces, SurfaceLoop, index, mesh)
         super(SurfaceLoop, self).__init__(nb=nb, group=group, name='Surface Loop', mesh=mesh)
         self.surfaces = surfaces
         self._index = index
@@ -399,7 +399,7 @@ class Volume(VolumeEntity):
             nb = type(self).count
         self.check_instance(surfaceloops, SurfaceLoop, index, mesh)
         super(Volume, self).__init__(nb=nb, group=group, name='Volume', mesh=mesh)
-        self.surfaceloops = None
+        self.surfaceloops = surfaceloops
         self._index = index
 
     def _val2str(self):
@@ -417,7 +417,7 @@ class CompoundVolume(VolumeEntity):
             nb = type(self).count
         self.check_instance(volumes, Volume, index, mesh)
         super(Volume, self).__init__(nb=nb, group=group, name='Compound Volume', mesh=mesh)
-        self.volumes = None
+        self.volumes = volumes
         self._index = index
 
     def _val2str(self):
