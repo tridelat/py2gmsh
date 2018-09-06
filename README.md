@@ -80,7 +80,7 @@ Running gmsh to create a .msh file gives the following result for my_mesh.msh
 >> gmsh my_mesh.geo -2 -o my_mesh.msh
 ```
 <p align="center">
-<img src="https://github.com/tridelat/py2gmsh/tree/master/img/REAMDE_mesh_example.png" width=50%>
+<img src="https://github.com/tridelat/py2gmsh/tree/master/img/README_mesh_example.png" width=50%>
 </p>
 
 (!) for Fields using NodesList, VerticesList, EdgesList, FacesList,
