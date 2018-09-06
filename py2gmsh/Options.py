@@ -1,4 +1,3 @@
-
 class OptionsHolder:
     def __init__(self):
         self.Mesh = Mesh()

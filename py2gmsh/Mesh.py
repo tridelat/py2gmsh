@@ -1,22 +1,31 @@
-from py2gmsh import Entity as ent
-from py2gmsh import Fields as fld
-from py2gmsh import Options as opt
+from . import Entity as ent
+from . import Field as fld
+from . import Options as opt
 
 class Mesh:
     def __init__(self):
         self.points = {}
+        self.points_count = 0
         self.lines = {}
+        self.lines_count = 0
         self.lineloops = {}
+        self.lineloops_count = 0
         self.surfaces = {}
+        self.surfaces_count = 0
         self.surfaceloops = {}
+        self.surfaceloops_count = 0
         self.volumes = {}
+        self.volumes_count = 0
         self.regions = {}
+        self.regions_count = 0
         self.fields = {}
+        self.fields_count = 0
         self.groups = {}
+        self.groups_count = 0
         self.Options = opt.OptionsHolder()
         self.BackgroundField = None
         self.BoundaryLayerField = None
-        self.Coherence = True
+        self.Coherence = False
 
     def getPointsFromIndex(self, index):
         if isinstance(index, int):
@@ -76,31 +85,65 @@ class Mesh:
 
     def addEntity(self, entity):
         if isinstance(entity, ent.Point):
+            if entity.nb is None:
+                self.points_count += 1
+                entity.nb = self.points_count
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
         elif isinstance(entity, ent.LineEntity):
+            if entity.nb is None:
+                self.lines_count += 1
+                entity.nb = self.lines_count
             assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
             self.lines[entity.nb] = entity
         elif isinstance(entity, ent.LineLoop):
+            if entity.nb is None:
+                self.lineloops_count += 1
+                entity.nb = self.lineloops_count
             assert not self.lineloops.get(entity.nb), 'LineLoop nb '+str(entity.nb)+' already exists!'
             self.lineloops[entity.nb] = entity
         elif isinstance(entity, ent.SurfaceEntity):
+            if entity.nb is None:
+                self.surfaces_count += 1
+                entity.nb = self.surfaces_count
             assert not self.surfaces.get(entity.nb), 'Surface nb '+str(entity.nb)+' already exists!'
             self.surfaces[entity.nb] = entity
         elif isinstance(entity, ent.SurfaceLoop):
+            if entity.nb is None:
+                self.surfaceloops_count += 1
+                entity.nb = self.surfaceloops_count
             assert not self.surfaceloops.get(entity.nb), 'SurfaceLoop nb '+str(entity.nb)+' already exists!'
             self.surfaceloops[entity.nb] = entity
         elif isinstance(entity, ent.VolumeEntity):
+            if entity.nb is None:
+                self.volumes_count += 1
+                entity.nb = self.volumes_count
             assert not self.volumes.get(entity.nb), 'Volume nb '+str(entity.nb)+' already exists!'
             self.volumes[entity.nb] = entity
+        elif isinstance(entity, ent.PhysicalGroup):
+            self.addGroup(entity)
+        elif isinstance(entity, fld.Field):
+            self.addField(entity)
+        else:
+            raise TypeError("not a valid Entity instance")
+
+    def addEntities(self, entities):
+        for entity in entities:
+            self.addEntity(entity)
 
     def addGroup(self, group):
-        assert isinstance(group, ent.PhysicalGroup), 'Not a PhysicalGroup object'
+        assert isinstance(group, ent.PhysicalGroup), 'Not a valid PhysicalGroup instance'
+        if group.nb is None:
+            self.groups_count += 1
+            group.nb = self.groups_count
         assert not self.groups.get(group.nb), 'PhysicalGroup nb '+str(group.nb)+' already exists!'
         self.groups[group.nb] = group
 
     def addField(self, field):
-        assert isinstance(field, fld.Field), 'Not a Field object'
+        assert isinstance(field, fld.Field), 'Not a valid Field instance'
+        if field.nb is None:
+            self.fields_count += 1
+            field.nb = self.fields_count
         assert not self.fields.get(field.nb), 'Field nb '+str(field.nb)+' already exists!'
         self.fields[field.nb] = field
 
@@ -159,8 +202,10 @@ class Mesh:
                 if val is not None:
                     if isinstance(val, str):
                         val_str = '"'+val+'"'
-                    elif attr == 'EdgesList' or attr =='NodesList' or attr == 'FacesList' or attr == 'RegionsList' or attr == 'FieldsList':
+                    elif attr == 'EdgesList' or attr =='NodesList' or attr == 'FacesList' or attr == 'RegionsList' or attr == 'FieldsList' or attr == 'VerticesList':
                         val_str = '{'+str([v.nb for v in val])[1:-1]+'}'
+                    elif attr == 'IField' or attr == 'FieldX' or attr == 'FieldY' or attr == 'FieldZ':
+                        val_str = str(val.nb)
                     else:
                         val_str = str(val)
                         if isinstance(val, (list, tuple)):
@@ -195,69 +240,73 @@ class Mesh:
         geo.close()
 
 
-def geometry_to_gmsh(domain):
-    self = domain
+def geometry2mesh(domain):
     lines_dict = {}
 
     mesh = Mesh()
 
-    if self.boundaryTags:
-        for i, tag in enumerate(self.boundaryTags):
-            phys = PhysicalGroup(nb=i, name=tag)
-            mesh.addPhysicalGroup(phys)
+    if domain.boundaryTags:
+        for tag, flag in domain.boundaryTags.items():
+            phys = ent.PhysicalGroup(nb=flag, name=tag)
+            mesh.addGroup(phys)
 
-    for i, v in enumerate(self.vertices):
-        p = Point(v)
+    for i, v in enumerate(domain.vertices):
+        if domain.nd == 2:
+            p = ent.Point([v[0], v[1], 0.])
+        else:
+            p = ent.Point(v)
         mesh.addEntity(p)
-        g = mesh.physicalgroups.get(self.vertexFlags[i])
+        g = mesh.groups.get(domain.vertexFlags[i])
         if g:
             g.addEntity(p)
+    nb_points = i+1
+    for i in range(nb_points):
+        lines_dict[i] = {}
         
-    for i, s in enumerate(self.segments):
+    for i, s in enumerate(domain.segments):
         lines_dict[s[0]][s[1]] = i
-        l = Line([s[0]+1, s[1]+1])
+        l = ent.Line([mesh.points[s[0]+1], mesh.points[s[1]+1]])
         mesh.addEntity(l)
-        g = mesh.physicalgroups.get(self.segmentFlags[i])
+        g = mesh.groups.get(domain.segmentFlags[i])
         if g:
             g.addEntity(l)
 
-    for i, f in enumerate(self.facets):
-        if self.nd == 3 or (self.nd == 2 and i not in self.holes_ind):
-            lineloop = []
+    for i, f in enumerate(domain.facets):
+        if domain.nd == 3 or (domain.nd == 2 and i not in domain.holes_ind):
             lineloops = []
             for j, subf in enumerate(f):
+                lineloop = []
                 # vertices in facet
                 for k, ver in enumerate(subf):
                     if ver in lines_dict[subf[k-1]].keys():
                         lineloop += [lines_dict[subf[k-1]][ver]+1]
                     elif subf[k-1] in lines_dict[ver].keys():
                         # reversed
-                        lineloop += [-(lines_dict[ver][subf[k-1]]+1)]
+                        lineloop += [(lines_dict[ver][subf[k-1]]+1)]
                     else:
-                        l = Line(mesh.points[subf[k-1]+1], ver+1)
+                        l = ent.Line([mesh.points[subf[k-1]+1], mesh.points[ver+1]])
                         mesh.addEntity(l)
                         lineloop += [l.nb]
-                ll = LineLoop(lineloop)
+                ll = ent.LineLoop(mesh.getLinesFromIndex(lineloop))
                 mesh.addEntity(ll)
                 lineloops += [ll.nb]
-            s = Surface(lineloops)
+            s = ent.PlaneSurface([mesh.lineloops[loop] for loop in lineloops])
             mesh.addEntity(s)
-            g = mesh.physicalgroups.get(self.facetFlags[i])
+            g = mesh.groups.get(domain.facetFlags[i])
             if g:
                 g.addEntity(s)
 
-    for i, V in enumerate(self.volumes):
+    for i, V in enumerate(domain.volumes):
         surface_loops = []
-        if i not in self.holes_ind:
-            for j, sV in enumerate(V):
-                sl = SurfaceLoop((np.array(sV)+1).tolist())
-                mesh.addEntity(sl)
-                surface_loops += [sl.nb]
-            vol = Volume(surface_loops)
-            mesh.addEntity(vol)
-            g = mesh.physicalgroups.get(self.regionFlags[i])
-            if g:
-                g.addEntity(vol)
+        hole_loops = []
+        for j, sV in enumerate(V):
+            sl = ent.SurfaceLoop(mesh.getSurfacesFromIndex((np.array(sV)+1).tolist()))
+            mesh.addEntity(sl)
+            surface_loops += [sl]
+        vol = ent.Volume(surface_loops)
+        mesh.addEntity(vol)
+        g = mesh.groups.get(domain.regionFlags[i])
+        if g:
+            g.addEntity(vol)
 
     return mesh
- 

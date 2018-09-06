@@ -1,5 +1,3 @@
-import numpy as np
-
 class Field(object):
     __slots__ = ['nb', 'add_bg', 'name']
     nb_total = 0

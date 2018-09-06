@@ -1,5 +1,3 @@
-import numpy as np
-
 class PhysicalGroup(object):
     """PhysicalGroup
 
@@ -14,13 +12,8 @@ class PhysicalGroup(object):
     mesh: Optional[py2gmsh.Mesh.Mesh]
         Mesh class instance to which the group belongs.
     """
-    count = 0
     def __init__(self, nb=None, name=None, mesh=None):
-        type(self).count += 1
-        if nb is None:
-            self.nb = type(self).count
-        else:
-            self.nb = nb
+        self.nb = nb
         self.name = name
         self.points = {}
         self.lines = {}
@@ -52,6 +45,10 @@ class PhysicalGroup(object):
         elif isinstance(entity, VolumeEntity):
             assert not self.volumes.get(entity.nb), 'Volume nb '+str(entity.nb)+' already exists!'
             self.volumes[entity.nb] = entity
+
+    def addEntities(self, entities):
+        for entity in entities:
+            self.addEntity(entity)
 
 
 class Entity(object):
@@ -108,11 +105,7 @@ class Point(Entity):
     mesh: Optional[py2gmsh.Mesh.Mesh]
         Mesh of entity.
     """
-    count = 0
     def __init__(self, xyz, nb=None, group=None, mesh=None):
-        type(self).count += 1
-        if nb is None:
-            nb = type(self).count
         super(Point, self).__init__(nb=nb, group=group, name='Point', mesh=mesh)
         self.xyz = xyz
 
@@ -141,11 +134,7 @@ class LineEntity(Entity):
     mesh: Optional[py2gmsh.Mesh.Mesh]
         Mesh of line.
     """
-    count = 0
     def __init__(self, nb=None, group=None, name=None, mesh=None):
-        LineEntity.count += 1
-        if nb is None:
-            nb = LineEntity.count
         super(LineEntity, self).__init__(nb=nb, group=group, name=name, mesh=mesh)
 
 class Line(LineEntity):
@@ -273,11 +262,7 @@ class CompoundLine(LineEntity):
 # LINE LOOPS
 
 class LineLoop(Entity):
-    count = 0
     def __init__(self, lines, nb=None, group=None, index=False, mesh=None):
-        type(self).count += 1
-        if nb is None:
-            nb = type(self).count
         self.check_instance(lines, Line, index, mesh)
         super(LineLoop, self).__init__(nb=nb, group=group, name='Line Loop', mesh=mesh)
         self.lines = lines
@@ -310,11 +295,7 @@ class SurfaceEntity(Entity):
     """
     Parent class of all surface type entities
     """
-    count = 0
     def __init__(self, nb=None, group=None, name=None, mesh=None):
-        SurfaceEntity.count += 1
-        if nb is None:
-            nb = SurfaceEntity.count
         super(SurfaceEntity, self).__init__(nb=nb, group=group, name=name, mesh=mesh)
 
 
@@ -360,11 +341,7 @@ class CompoundSurface(SurfaceEntity):
 # SURFACE LOOPS
 
 class SurfaceLoop(Entity):
-    count = 0
     def __init__(self, surfaces, nb=None, group=None, index=False, mesh=None):
-        type(self).count += 1
-        if nb is None:
-            nb = type(self).count
         self.check_instance(surfaces, SurfaceLoop, index, mesh)
         super(SurfaceLoop, self).__init__(nb=nb, group=group, name='Surface Loop', mesh=mesh)
         self.surfaces = surfaces
@@ -383,20 +360,12 @@ class VolumeEntity(Entity):
     """
     Parent class of all surface type entities
     """
-    count = 0
     def __init__(self, nb=None, group=None, name=None, mesh=None):
-        VolumeEntity.count += 1
-        if nb is None:
-            nb = VolumeEntity.count
         super(VolumeEntity, self).__init__(nb=nb, group=group, name=name, mesh=mesh)
 
 
 class Volume(VolumeEntity):
-    count = 0
     def __init__(self, surfaceloops, nb=None, group=None, index=False, mesh=None):
-        type(self).count += 1
-        if nb is None:
-            nb = type(self).count
         self.check_instance(surfaceloops, SurfaceLoop, index, mesh)
         super(Volume, self).__init__(nb=nb, group=group, name='Volume', mesh=mesh)
         self.surfaceloops = surfaceloops
@@ -410,11 +379,7 @@ class Volume(VolumeEntity):
 
 
 class CompoundVolume(VolumeEntity):
-    count = 0
     def __init__(self, volumes, nb=None, group=None, index=False, mesh=None):
-        type(self).count += 1
-        if nb is None:
-            nb = type(self).count
         self.check_instance(volumes, Volume, index, mesh)
         super(Volume, self).__init__(nb=nb, group=group, name='Compound Volume', mesh=mesh)
         self.volumes = volumes
