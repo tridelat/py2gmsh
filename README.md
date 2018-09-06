@@ -24,7 +24,7 @@ close to the one used in .geo files
 from py2gmsh import (Mesh, Entity, Fields)
 
 # create Mesh class instance
-my_mesh = Mesh.Mesh()
+my_mesh = Mesh()
 
 # create points
 p1 = Entity.Point([0., 0., 0.])
@@ -157,22 +157,26 @@ my_mesh.addEntity(ll1)
 Certain objects can be directly converted to a `py2gmsh.Mesh.Mesh` instance. This has been used to convert geometries using the syntax of https://github.com/erdc/proteus domains for example.
 
 ```python
-my_mesh = Mesh.geometry2mesh(my_geometry)
+from py2gmsh import geometry2gmsh
+
+my_mesh = geometry2mesh(my_geometry)
 ```
 
 The geometry variable `my_geometry` must be an object (e.g. class) containing the following attributes:
 
-| entity       | shape          | opt | type                                           |
-|--------------|----------------|-----|------------------------------------------------|
-| vertices     | (np, 3)        | no  | array of point coordinates                     |
-| vertexFlags  | (np)           | yes | array of point physical group numbers          |
-| segments     | (ns, 2)        | yes | array of lines                                 |
-| segmentFlags | (ns)           | yes | array of segment physical group numbers        |
-| facets       | (nf, nsf, npf) | yes | array of surfaces (loop of point numbers)      |
-| facetFlags   | (nf)           | yes | array of facets physical groups                |
-| volumes      | (nv, nsv, nfv) | yes | array of volumes (list of facets)              |
-| regionFlags  | (nv)           | yes | array of volume physical group numbers         |
-| boundaryTags | dict           | yes | dictionary of physical groups {'name': number} |
+| entity       | shape          | opt | type                                               |
+|--------------|----------------|-----|----------------------------------------------------|
+| vertices     | (np, 3)        | no  | array of point coordinates                         |
+| vertexFlags  | (np)           | yes | array of point physical group numbers              |
+| segments     | (ns, 2)        | yes | array of lines                                     |
+| segmentFlags | (ns)           | yes | array of segment physical group numbers            |
+| facets       | (nf, nsf, npf) | yes | array of surfaces (loop of point numbers)          |
+| facetFlags   | (nf)           | yes | array of facets physical groups                    |
+| volumes      | (nv, nsv, nfv) | yes | array of volumes (list of facets)                  |
+| regionFlags  | (nv)           | yes | array of volume physical group numbers             |
+| boundaryTags | dict           | yes | dictionary of physical groups {'name': number}     |
+| holes_ind    | (nh)           | yes | list of holes index (facets in 2D / volumes in 3D) |
+
 np: number of points;
 ns: number of segments;
 nf: number of facets;
@@ -180,6 +184,7 @@ nsf: number of subfacets;
 npf: number of points per facet;
 nv: number of volumes;
 nsv: number of subvolumes;
-nfv: number of facets per volume
+nfv: number of facets per volume;
+nh: number of holes
 
-opt: optional (can be an empty list)
+opt: optional. Optional argument can be empty (e.g. empty list) but must be present in the geometry object.
