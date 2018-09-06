@@ -21,7 +21,7 @@ The following example shows how a simple geometry can created using a syntax
 close to the one used in .geo files
 
 ```python
-from py2gmsh import (Mesh, Entity, Fields)
+from py2gmsh import (Mesh, Entity, Field)
 
 # create Mesh class instance
 my_mesh = Mesh()
@@ -53,13 +53,13 @@ ll1 = Entity.LineLoop([l1, l2, l3, l4], mesh=my_mesh)
 s1 = Entity.PlaneSurface([ll1], mesh=my_mesh)
 
 # create fields
-f1 = Fields.MathEval(mesh=my_mesh)
+f1 = Field.MathEval(mesh=my_mesh)
 grading = 1.1
 he = 0.005
 f1.F = '(abs(y-0.5)*({grading}-1)+{he})/{grading}'.format(grading=grading,
                                                           he=he)
 # create minimum field
-fmin = Fields.Min(mesh=my_mesh)
+fmin = Field.Min(mesh=my_mesh)
 fmin.FieldsList = [f1]  # could add more fields in the list if necessary
 
 # set the background field as minimum field
