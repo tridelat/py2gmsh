@@ -262,7 +262,7 @@ def geometry2mesh(domain):
     nb_points = i+1
     for i in range(nb_points):
         lines_dict[i] = {}
-        
+
     for i, s in enumerate(domain.segments):
         lines_dict[s[0]][s[1]] = i
         l = ent.Line([mesh.points[s[0]+1], mesh.points[s[1]+1]])
@@ -300,7 +300,7 @@ def geometry2mesh(domain):
         surface_loops = []
         hole_loops = []
         for j, sV in enumerate(V):
-            sl = ent.SurfaceLoop(mesh.getSurfacesFromIndex((np.array(sV)+1).tolist()))
+            sl = ent.SurfaceLoop(mesh.getSurfacesFromIndex([sVnb + 1 for sVnb in sV]))
             mesh.addEntity(sl)
             surface_loops += [sl]
         vol = ent.Volume(surface_loops)
