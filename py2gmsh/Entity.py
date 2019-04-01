@@ -289,6 +289,10 @@ class LineLoop(Entity):
             ll = self.lines
         return '{'+str(ll)[1:-1]+'}'
 
+# Line Loop is called Curve Loop in gmsh >= 4
+CurveLoop = LineLoop
+
+
 # SURFACES
 
 class SurfaceEntity(Entity):

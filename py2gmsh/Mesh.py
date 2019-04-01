@@ -26,6 +26,10 @@ class Mesh:
         self.BackgroundField = None
         self.BoundaryLayerField = None
         self.Coherence = False
+        self.gmsh_version = 4
+
+    def setGmshVersion(self, version):
+        assert version in [3, 4], 'gmsh version must be 3 or 4'
 
     def getPointsFromIndex(self, index):
         if isinstance(index, int):
@@ -159,7 +163,10 @@ class Mesh:
         for key, entity in self.lines.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
         for key, entity in self.lineloops.items():
-            geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
+            if self.gmsh_version == 4:
+                geo.write("{0}({1}) = {2};\n".format('Curve Loop', key, entity._val2str()))
+            elif self.gmsh_version == 3:
+                geo.write("{0}({1}) = {2};\n".format('Line Loop', key, entity._val2str()))
         for key, entity in self.surfaces.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
         for key, entity in self.surfaceloops.items():
@@ -183,7 +190,10 @@ class Mesh:
                 lines = []
                 for key, line in group.lines.items():
                     lines.append(line.nb)
-                geo.write("Physical Line({0}) = {{{1}}};\n".format(name, str(lines)[1:-1]))
+                if self.gmsh_version == 4:
+                    geo.write("Physical Curve({0}) = {{{1}}};\n".format(name, str(lines)[1:-1]))
+                elif self.gmsh_version == 3:
+                    geo.write("Physical Line({0}) = {{{1}}};\n".format(name, str(lines)[1:-1]))
             if group.surfaces:
                 surfaces = []
                 for key, surface in group.surfaces.items():
