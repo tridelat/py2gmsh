@@ -38,16 +38,16 @@ my_mesh.addEntity(p3)
 # entities can also directly be added to a mesh:
 p4 = Entity.Point([0., 1., 0.], mesh=my_mesh)
 
-# create lines
-l1 = Entity.Line([p1, p2])
-l2 = Entity.Line([p2, p3])
-l3 = Entity.Line([p3, p4])
-l4 = Entity.Line([p4, p1])
+# create curves
+l1 = Entity.Curve([p1, p2])
+l2 = Entity.Curve([p2, p3])
+l3 = Entity.Curve([p3, p4])
+l4 = Entity.Curve([p4, p1])
 # entities can also be added in a batch
 my_mesh.addEntities([l1, l2, l3, l4])
 
-# create lineloop
-ll1 = Entity.LineLoop([l1, l2, l3, l4], mesh=my_mesh)
+# create curveloop
+ll1 = Entity.CurveLoop([l1, l2, l3, l4], mesh=my_mesh)
 
 # create surface
 s1 = Entity.PlaneSurface([ll1], mesh=my_mesh)
@@ -139,7 +139,7 @@ my_mesh.points[4]  # <-- returns Point instance number 4
 my_mesh.getPointsFromIndex(4)  # <-- same as above
 my_mesh.getPointsFromIndex([1, 2, 3, 4])  # <-- returns list of Point instances
 # other functions
-my_mesh.getLinesFromIndex(...)
+my_mesh.getCurvesFromIndex(...)
 my_mesh.getSurfacesFromIndex(...)
 my_mesh.getSurfaceLoopsFromIndex(...)
 my_mesh.getVolumesFromIndex(...)
@@ -149,7 +149,7 @@ my_mesh.getGroupsFromIndex(...)
 
 This can be used to create other entities, such as:
 ```python
-ll1 = Entity.LineLoop(my_mesh.getLinesFromIndex([1,2,3,4]))
+ll1 = Entity.CurveLoop(my_mesh.getCurvesFromIndex([1,2,3,4]))
 my_mesh.addEntity(ll1)
 ```
 
@@ -169,7 +169,7 @@ The geometry variable `my_geometry` must be an object (e.g. class) containing th
 |--------------|----------------|-----|----------------------------------------------------|
 | vertices     | (np, 3)        | no  | array of point coordinates                         |
 | vertexFlags  | (np)           | yes | array of point physical group numbers              |
-| segments     | (ns, 2)        | yes | array of lines                                     |
+| segments     | (ns, 2)        | yes | array of curves                                     |
 | segmentFlags | (ns)           | yes | array of segment physical group numbers            |
 | facets       | (nf, nsf, npf) | yes | array of surfaces (loop of point numbers)          |
 | facetFlags   | (nf)           | yes | array of facets physical groups                    |
