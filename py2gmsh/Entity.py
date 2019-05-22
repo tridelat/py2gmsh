@@ -296,7 +296,7 @@ class CurveLoop(Entity):
         return '{'+str(ll)[1:-1]+'}'
 
 
-Curveloop = CurveLoop
+LineLoop = CurveLoop
 
 
 # SURFACES
