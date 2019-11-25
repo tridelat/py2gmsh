@@ -21,7 +21,7 @@ The following example shows how a simple geometry can created using a syntax
 close to the one used in .geo files
 
 ```python
-from py2gmsh import (Mesh, Entity, Fields)
+from py2gmsh import (Mesh, Entity, Field)
 
 # create Mesh class instance
 my_mesh = Mesh()
@@ -53,13 +53,13 @@ ll1 = Entity.LineLoop([l1, l2, l3, l4], mesh=my_mesh)
 s1 = Entity.PlaneSurface([ll1], mesh=my_mesh)
 
 # create fields
-f1 = Fields.MathEval(mesh=my_mesh)
+f1 = Field.MathEval(mesh=my_mesh)
 grading = 1.1
 he = 0.005
 f1.F = '(abs(y-0.5)*({grading}-1)+{he})/{grading}'.format(grading=grading,
                                                           he=he)
 # create minimum field
-fmin = Fields.Min(mesh=my_mesh)
+fmin = Field.Min(mesh=my_mesh)
 fmin.FieldsList = [f1]  # could add more fields in the list if necessary
 
 # set the background field as minimum field
@@ -75,12 +75,13 @@ my_mesh.Coherence = True
 my_mesh.writeGeo('my_mesh.geo')
 ```
 
-Running gmsh to create a .msh file gives the following result for my_mesh.msh
+The .geo file `my_mesh.geo` can be opened directly in the gmsh GUI for visualisation and meshing. Alternatively, running gmsh to create a .msh file gives the following result for my_mesh.msh:
+
 ```
 >> gmsh my_mesh.geo -2 -o my_mesh.msh
 ```
 <p align="center">
-<img src="https://github.com/tridelat/py2gmsh/tree/master/img/README_mesh_example.png" width=50%>
+<img src="https://raw.githubusercontent.com/tridelat/py2gmsh/master/img/README_mesh_example.png" width=50%>
 </p>
 
 (!) for Fields using NodesList, VerticesList, EdgesList, FacesList,
@@ -157,7 +158,7 @@ my_mesh.addEntity(ll1)
 Certain objects can be directly converted to a `py2gmsh.Mesh.Mesh` instance. This has been used to convert geometries using the syntax of https://github.com/erdc/proteus domains for example.
 
 ```python
-from py2gmsh import geometry2gmsh
+from py2gmsh import geometry2mesh
 
 my_mesh = geometry2mesh(my_geometry)
 ```
