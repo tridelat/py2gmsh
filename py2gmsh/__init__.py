@@ -1,1 +1,1 @@
-from Mesh import (Mesh, geometry2mesh)
+from .Mesh import (Mesh, geometry2mesh)

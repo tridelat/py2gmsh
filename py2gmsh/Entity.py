@@ -16,8 +16,8 @@ class PhysicalGroup(object):
         self.nb = nb
         self.name = name
         self.points = {}
-        self.lines = {}
-        self.lineloops = {}
+        self.curves = {}
+        self.curveloops = {}
         self.surfaces = {}
         self.surfaceloops = {}
         self.volumes = {}
@@ -31,14 +31,14 @@ class PhysicalGroup(object):
         Parameters
         ----------
         entity: py2gmsh.Entity.Entity
-            Entity to add to group (e.g. Point, Line, LineLoop).
+            Entity to add to group (e.g. Point, Curve, CurveLoop).
         """
         if isinstance(entity, Point):
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
-        elif isinstance(entity, LineEntity):
-            assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
-            self.lines[entity.nb] = entity
+        elif isinstance(entity, CurveEntity):
+            assert not self.curves.get(entity.nb), 'Curve nb '+str(entity.nb)+' already exists!'
+            self.curves[entity.nb] = entity
         elif isinstance(entity, SurfaceEntity):
             assert not self.surfaces.get(entity.nb), 'Surface nb '+str(entity.nb)+' already exists!'
             self.surfaces[entity.nb] = entity
@@ -116,36 +116,36 @@ class Point(Entity):
         return '{'+str([v for v in self.xyz])[1:-1]+'}'
 
 
-# LINES
+# CURVES
 
-class LineEntity(Entity):
-    """Parent class for all line type entities.
+class CurveEntity(Entity):
+    """Parent class for all curve type entities.
 
     Parameters
     ----------
     nb: Optional[int]
         Point number. If not set, it will use the class count 
         number (incrementing automatically upon creation of new
-        lines).
+        curves).
     group: Optional[PhysicalGroup]
         Physical group of Entity.
     name: Optional[str]
-        Name of line.
+        Name of curve.
     mesh: Optional[py2gmsh.Mesh.Mesh]
-        Mesh of line.
+        Mesh of curve.
     """
     def __init__(self, nb=None, group=None, name=None, mesh=None):
-        super(LineEntity, self).__init__(nb=nb, group=group, name=name, mesh=mesh)
+        super(CurveEntity, self).__init__(nb=nb, group=group, name=name, mesh=mesh)
 
-class Line(LineEntity):
-    """Creates a Line.
+class Curve(CurveEntity):
+    """Creates a Curve.
 
     Parameters
     ----------
     points: array_like[Points]
         Points instances (array of length 2)
     nb: Optional[int]
-        LineEntity number. If not set, it will use the class count 
+        CurveEntity number. If not set, it will use the class count 
         number (incrementing automatically upon creation of new
         points).
     group: Optional[PhysicalGroup]
@@ -154,9 +154,9 @@ class Line(LineEntity):
         Mesh of entity.
     """
     def __init__(self, points, nb=None, group=None, index=False, mesh=None):
-        assert len(points) == 2, 'points array must be of length 2 when creating a line'
+        assert len(points) == 2, 'points array must be of length 2 when creating a curve'
         self.check_instance(points, Point, index, mesh)
-        super(Line, self).__init__(nb=nb, group=group, name='Line', mesh=mesh)
+        super(Curve, self).__init__(nb=nb, group=group, name='Curve', mesh=mesh)
         self.points = points
         self._index = index
 
@@ -167,7 +167,10 @@ class Line(LineEntity):
         return '{'+str([v.nb for v in self.points])[1:-1]+'}'
 
 
-class Circle(LineEntity):
+Line = Curve
+
+
+class Circle(CurveEntity):
     """Creates a Circle.
 
     Parameters
@@ -179,7 +182,7 @@ class Circle(LineEntity):
     end: Point
         end point of circle arc.
     nb: Optional[int]
-        LineEntity number. If not set, it will use the class count 
+        CurveEntity number. If not set, it will use the class count 
         number (incrementing automatically upon creation of new
         points).
     group: Optional[PhysicalGroup]
@@ -201,7 +204,7 @@ class Circle(LineEntity):
         return '{'+str([self.start.nb, self.center.nb, self.end.nb])[1:-1]+'}'
 
 
-class CatmullRom(LineEntity):
+class CatmullRom(CurveEntity):
     def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         self.check_instance(points, Point, index, mesh)
         super(Spline, self).__init__(nb=nb, group=group, name='CatmullRom', mesh=mesh)
@@ -212,7 +215,7 @@ class CatmullRom(LineEntity):
         return '{'+str([v.nb for v in self.points])[1:-1]+'}'
 
 
-class Ellipse(LineEntity):
+class Ellipse(CurveEntity):
     def __init__(self, start, center, axis_point, end, nb=None, group=None, index=False, mesh=None):
         self.check_instance([start, center, acis_point, end], Point, index, mesh)
         super(Circle, self).__init__(nb=nb, group=group, name='Ellipse', mesh=mesh)
@@ -226,7 +229,7 @@ class Ellipse(LineEntity):
         return '{'+str([self.start, self.center, self.axis_point, self.end])[1:-1]+'}'
 
 
-class BSpline(LineEntity):
+class BSpline(CurveEntity):
     def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         self.check_instance(points, Point, index, mesh)
         super(BSpline, self).__init__(nb=nb, group=group, name='BSpline', mesh=mesh)
@@ -237,7 +240,7 @@ class BSpline(LineEntity):
         return '{'+str([v.nb for v in self.points])[1:-1]+'}'
 
 
-class Spline(LineEntity):
+class Spline(CurveEntity):
     def __init__(self, points, nb=None, group=None, index=False, mesh=None):
         self.check_instance(points, Point, index, mesh)
         super(Spline, self).__init__(nb=nb, group=group, name='Spline', mesh=mesh)
@@ -248,46 +251,53 @@ class Spline(LineEntity):
         return '{'+str([v.nb for v in self.points])[1:-1]+'}'
 
 
-class CompoundLine(LineEntity):
-    def __init__(self, lines, nb=None, group=None, index=False, mesh=None):
-        self.check_instance(lines, Line, index, mesh)
-        super(Spline, self).__init__(nb=nb, group=group, name='Compound Line', mesh=mesh)
-        self.lines = lines
+class CompoundCurve(CurveEntity):
+    def __init__(self, curves, nb=None, group=None, index=False, mesh=None):
+        self.check_instance(curves, Curve, index, mesh)
+        super(Spline, self).__init__(nb=nb, group=group, name='Compound Curve', mesh=mesh)
+        self.curves = curves
         self._index = index
 
     def _val2str(self):
-        return '{'+str([v.nb for v in self.lines])[1:-1]+'}'
+        return '{'+str([v.nb for v in self.curves])[1:-1]+'}'
 
 
-# LINE LOOPS
+CompoundLine = CompoundCurve
 
-class LineLoop(Entity):
-    def __init__(self, lines, nb=None, group=None, index=False, mesh=None):
-        self.check_instance(lines, Line, index, mesh)
-        super(LineLoop, self).__init__(nb=nb, group=group, name='Line Loop', mesh=mesh)
-        self.lines = lines
+
+# CURVE LOOPS
+
+class CurveLoop(Entity):
+    def __init__(self, curves, nb=None, group=None, index=False, mesh=None):
+        self.check_instance(curves, Curve, index, mesh)
+        super(CurveLoop, self).__init__(nb=nb, group=group, name='Curve Loop', mesh=mesh)
+        self.curves = curves
         self._index = index
 
-    def setLines(self, lines):
-        self.lines[:] = [lines]
+    def setCurves(self, curves):
+        self.curves[:] = [curves]
 
     def _val2str(self):
         ll = []
         if self._index is False:
-            for i, line in enumerate(self.lines):
-                if self.lines[i-1].points[1] == self.lines[i].points[0]:
-                    ll += [self.lines[i].nb]
-                elif self.lines[i-1].points[1] == self.lines[i].points[1]:
-                    ll += [-self.lines[i].nb]
-                elif self.lines[i-1].points[0] == self.lines[i].points[0]:
-                    ll += [self.lines[i].nb]
-                elif self.lines[i-1].points[0] == self.lines[i].points[1]:
-                    ll += [-self.lines[i].nb]
+            for i, curve in enumerate(self.curves):
+                if self.curves[i-1].points[1] == self.curves[i].points[0]:
+                    ll += [self.curves[i].nb]
+                elif self.curves[i-1].points[1] == self.curves[i].points[1]:
+                    ll += [-self.curves[i].nb]
+                elif self.curves[i-1].points[0] == self.curves[i].points[0]:
+                    ll += [self.curves[i].nb]
+                elif self.curves[i-1].points[0] == self.curves[i].points[1]:
+                    ll += [-self.curves[i].nb]
                 else:
-                    assert 2<3, 'lineloop is wrong'
+                    assert 2<3, 'curveloop is wrong'
         else:
-            ll = self.lines
+            ll = self.curves
         return '{'+str(ll)[1:-1]+'}'
+
+
+LineLoop = CurveLoop
+
 
 # SURFACES
 
@@ -300,31 +310,31 @@ class SurfaceEntity(Entity):
 
 
 class PlaneSurface(SurfaceEntity):
-    def __init__(self, lineloops, nb=None, group=None, index=False, mesh=None):
-        self.check_instance(lineloops, LineLoop, index, mesh)
+    def __init__(self, curveloops, nb=None, group=None, index=False, mesh=None):
+        self.check_instance(curveloops, CurveLoop, index, mesh)
         super(PlaneSurface, self).__init__(nb=nb, group=group, name='Plane Surface', mesh=mesh)
-        self.lineloops = lineloops
+        self.curveloops = curveloops
         self._index = index
 
-    def setLineLoops(self, lineloops):
-        self.lineloops[:] = [lineloops]
+    def setCurveLoops(self, curveloops):
+        self.curveloops[:] = [curveloops]
 
     def _val2str(self):
-        return '{'+str([v.nb for v in self.lineloops])[1:-1]+'}'
+        return '{'+str([v.nb for v in self.curveloops])[1:-1]+'}'
 
 
 class RuledSurface(SurfaceEntity):
-    def __init__(self, lineloops, nb=None, group=None, sphere=None, mesh=None):
-        self.check_instance(lineloops, LineLoop, index, mesh)
+    def __init__(self, curveloops, nb=None, group=None, sphere=None, mesh=None):
+        self.check_instance(curveloops, CurveLoop, index, mesh)
         super(RuledSurface, self).__init__(nb=nb, group=group, name='Ruled Surface', mesh=mesh)
-        self.lineloops = lineloops
+        self.curveloops = curveloops
         self.Sphere = sphere
 
-    def setLineLoops(self, lineloops):
-        self.lineloops[:] = [lineloops]
+    def setCurveLoops(self, curveloops):
+        self.curveloops[:] = [curveloops]
 
     def _val2str(self):
-        return '{'+str([v.nb for v in self.lineloops])[1:-1]+'}'
+        return '{'+str([v.nb for v in self.curveloops])[1:-1]+'}'
 
 
 class CompoundSurface(SurfaceEntity):

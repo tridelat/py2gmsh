@@ -6,10 +6,10 @@ class Mesh:
     def __init__(self):
         self.points = {}
         self.points_count = 0
-        self.lines = {}
-        self.lines_count = 0
-        self.lineloops = {}
-        self.lineloops_count = 0
+        self.curves = {}
+        self.curves_count = 0
+        self.curveloops = {}
+        self.curveloops_count = 0
         self.surfaces = {}
         self.surfaces_count = 0
         self.surfaceloops = {}
@@ -35,13 +35,13 @@ class Mesh:
             points += [self.points[i]]
         return points
 
-    def getLinesFromIndex(self, index):
+    def getCurvesFromIndex(self, index):
         if isinstance(index, int):
             index = [index]
-        lines = []
+        curves = []
         for i in index:
-            lines += [self.lines[i]]
-        return lines
+            curves += [self.curves[i]]
+        return curves
 
     def getSurfacesFromIndex(self, index):
         if isinstance(index, int):
@@ -90,18 +90,18 @@ class Mesh:
                 entity.nb = self.points_count
             assert not self.points.get(entity.nb), 'Point nb '+str(entity.nb)+' already exists!'
             self.points[entity.nb] = entity
-        elif isinstance(entity, ent.LineEntity):
+        elif isinstance(entity, ent.CurveEntity):
             if entity.nb is None:
-                self.lines_count += 1
-                entity.nb = self.lines_count
-            assert not self.lines.get(entity.nb), 'Line nb '+str(entity.nb)+' already exists!'
-            self.lines[entity.nb] = entity
-        elif isinstance(entity, ent.LineLoop):
+                self.curves_count += 1
+                entity.nb = self.curves_count
+            assert not self.curves.get(entity.nb), 'Curve nb '+str(entity.nb)+' already exists!'
+            self.curves[entity.nb] = entity
+        elif isinstance(entity, ent.CurveLoop):
             if entity.nb is None:
-                self.lineloops_count += 1
-                entity.nb = self.lineloops_count
-            assert not self.lineloops.get(entity.nb), 'LineLoop nb '+str(entity.nb)+' already exists!'
-            self.lineloops[entity.nb] = entity
+                self.curveloops_count += 1
+                entity.nb = self.curveloops_count
+            assert not self.curveloops.get(entity.nb), 'CurveLoop nb '+str(entity.nb)+' already exists!'
+            self.curveloops[entity.nb] = entity
         elif isinstance(entity, ent.SurfaceEntity):
             if entity.nb is None:
                 self.surfaces_count += 1
@@ -156,9 +156,9 @@ class Mesh:
         geo = open(filename,'w')
         for key, entity in self.points.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
-        for key, entity in self.lines.items():
+        for key, entity in self.curves.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
-        for key, entity in self.lineloops.items():
+        for key, entity in self.curveloops.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
         for key, entity in self.surfaces.items():
             geo.write("{0}({1}) = {2};\n".format(entity.name, key, entity._val2str()))
@@ -179,11 +179,11 @@ class Mesh:
                 for key, point in group.points.items():
                     points.append(point.nb)
                 geo.write("Physical Point({0}) = {{{1}}};\n".format(name, str(points)[1:-1]))
-            if group.lines:
-                lines = []
-                for key, line in group.lines.items():
-                    lines.append(line.nb)
-                geo.write("Physical Line({0}) = {{{1}}};\n".format(name, str(lines)[1:-1]))
+            if group.curves:
+                curves = []
+                for key, curve in group.curves.items():
+                    curves.append(curve.nb)
+                geo.write("Physical Curve({0}) = {{{1}}};\n".format(name, str(curves)[1:-1]))
             if group.surfaces:
                 surfaces = []
                 for key, surface in group.surfaces.items():
@@ -241,7 +241,7 @@ class Mesh:
 
 
 def geometry2mesh(domain):
-    lines_dict = {}
+    curves_dict = {}
 
     mesh = Mesh()
 
@@ -261,11 +261,11 @@ def geometry2mesh(domain):
             g.addEntity(p)
     nb_points = i+1
     for i in range(nb_points):
-        lines_dict[i] = {}
-        
+        curves_dict[i] = {}
+
     for i, s in enumerate(domain.segments):
-        lines_dict[s[0]][s[1]] = i
-        l = ent.Line([mesh.points[s[0]+1], mesh.points[s[1]+1]])
+        curves_dict[s[0]][s[1]] = i
+        l = ent.Curve([mesh.points[s[0]+1], mesh.points[s[1]+1]])
         mesh.addEntity(l)
         g = mesh.groups.get(domain.segmentFlags[i])
         if g:
@@ -273,24 +273,26 @@ def geometry2mesh(domain):
 
     for i, f in enumerate(domain.facets):
         if domain.nd == 3 or (domain.nd == 2 and i not in domain.holes_ind):
-            lineloops = []
+            curveloops = []
             for j, subf in enumerate(f):
-                lineloop = []
+                curveloop = []
                 # vertices in facet
                 for k, ver in enumerate(subf):
-                    if ver in lines_dict[subf[k-1]].keys():
-                        lineloop += [lines_dict[subf[k-1]][ver]+1]
-                    elif subf[k-1] in lines_dict[ver].keys():
+                    if ver in curves_dict[subf[k-1]].keys():
+                        curveloop += [curves_dict[subf[k-1]][ver]+1]
+                    elif subf[k-1] in curves_dict[ver].keys():
                         # reversed
-                        lineloop += [(lines_dict[ver][subf[k-1]]+1)]
+                        curveloop += [(curves_dict[ver][subf[k-1]]+1)]
                     else:
-                        l = ent.Line([mesh.points[subf[k-1]+1], mesh.points[ver+1]])
+                        l = ent.Curve([mesh.points[subf[k-1]+1], mesh.points[ver+1]])
                         mesh.addEntity(l)
-                        lineloop += [l.nb]
-                ll = ent.LineLoop(mesh.getLinesFromIndex(lineloop))
+                        curves_dict[ver][subf[k-1]] = l.nb-1
+                        curves_dict[subf[k-1]][ver] = l.nb-1
+                        curveloop += [l.nb]
+                ll = ent.CurveLoop(mesh.getCurvesFromIndex(curveloop))
                 mesh.addEntity(ll)
-                lineloops += [ll.nb]
-            s = ent.PlaneSurface([mesh.lineloops[loop] for loop in lineloops])
+                curveloops += [ll.nb]
+            s = ent.PlaneSurface([mesh.curveloops[loop] for loop in curveloops])
             mesh.addEntity(s)
             g = mesh.groups.get(domain.facetFlags[i])
             if g:
@@ -300,7 +302,7 @@ def geometry2mesh(domain):
         surface_loops = []
         hole_loops = []
         for j, sV in enumerate(V):
-            sl = ent.SurfaceLoop(mesh.getSurfacesFromIndex((np.array(sV)+1).tolist()))
+            sl = ent.SurfaceLoop(mesh.getSurfacesFromIndex([sVnb + 1 for sVnb in sV]))
             mesh.addEntity(sl)
             surface_loops += [sl]
         vol = ent.Volume(surface_loops)
@@ -309,4 +311,5 @@ def geometry2mesh(domain):
         if g:
             g.addEntity(vol)
 
+    print("CREATED")
     return mesh
