@@ -245,6 +245,21 @@ def geometry2mesh(domain):
 
     mesh = Mesh()
 
+    # add all physical groups
+    for flag in domain.vertexFlags:
+        if not mesh.groups.get(flag)
+            mesh.addGroup(flag)
+    for flag in domain.segmentFlags:
+        if not mesh.groups.get(flag)
+            mesh.addGroup(flag)
+    for flag in domain.facetFlags:
+        if not mesh.groups.get(flag)
+            mesh.addGroup(flag)
+    for flag in domain.regionFlags:
+        if not mesh.groups.get(flag)
+            mesh.addGroup(flag)
+
+    # add tags for BCs
     if domain.boundaryTags:
         for tag, flag in domain.boundaryTags.items():
             phys = ent.PhysicalGroup(nb=flag, name=tag)
